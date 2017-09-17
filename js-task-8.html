@@ -1,0 +1,264 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>无标题文档</title>
+<style>
+div {
+	
+	border: 1px solid black;
+	margin: 10px;
+	display: flex;
+	flex-grow: 1;
+	background: #fff;
+	align-items: center;
+	
+}
+#root {
+	margin-left: 300px;
+	width: 750px;
+	height: 200px;
+}
+.click{
+	border: 1px solid #F75356;
+}
+body button:nth-child(2){
+	margin-left: 300px;
+	}
+button{
+	width: 100px;
+	height: 30px;
+	background: #5FB2E7;
+	border-radius: 5px;
+	}
+</style>
+<script type="text/javascript">
+	var tree=[];
+	var ani=true;
+	/*增加元素类名函数:element为需要增加类名的元素,value为需要给其增加的类名;*/
+	function addClass(element,value) {
+    if (!element) return false;
+    if (!element.className) {
+        element.className = value;
+    } else {
+        var tempName = element.className;
+        tempName += ' ';
+        tempName += value;
+        element.className = tempName;
+    }
+}
+/*删除元素类名函数:element为需要删除类名的元素,value为需要给其删除的类名;*/
+	function removeClass(element,value) {
+    if (element.className.indexOf(value) !== -1) {
+        var tempName = element.className;
+        tempName = tempName.replace(value, '');
+        element.className = tempName;
+    }
+}
+   /*得到所有子元素节点*/
+	function getChildren(root){
+		var children=root.children;
+		var childrenArr=[];
+		for(var i=0;i<children.length;i++){
+			if(children[i].nodeType==1){
+				childrenArr.push(children[i]);
+			}
+		}
+		return childrenArr;
+	}
+	 /*前序遍历*/
+	function dlrtree(root){
+		tree.push(root);
+		var childrenArr=getChildren(root);
+		for(i in childrenArr){
+			dlrtree(childrenArr[i]);
+		}	
+	}
+	/*后序遍历*/
+	function lrdtree(root){	
+		
+		var childrenArr=getChildren(root);
+		for(i in childrenArr){
+			dlrtree(childrenArr[i]);
+		}
+		tree.push(root);
+	}
+	/*显示*/
+	function show(){
+		var i=0;
+		var length=tree.length;
+		tree[i].style.backgroundColor="#5FB2E7";
+		var showtree=setInterval(function(){
+			i++;
+			tree[i-1].style.backgroundColor="#fff";
+			tree[i].style.backgroundColor="#5FB2E7";
+			if(i==length-1){
+				
+				clearInterval(showtree);
+				ani=true;
+				setTimeout(function(){
+					tree[i].style.backgroundColor="#fff"
+				},500);
+				
+				
+			}
+		},500);
+		
+	}
+	/*搜索后的显示*/
+	function showSearch(text){
+		var i=0;
+		var length=tree.length;
+		var search =false;
+		if(tree[i].childNodes[0].nodeValue==text){
+			tree[i].style.background="#D795F0";
+			search=true;
+		}
+		else{
+			tree[i].style.background="#5FB2E7";
+		}
+		var showtree=setInterval(function(){
+			i++;
+			if(tree[i-1].childNodes[0].nodeValue!=text){
+				tree[i-1].style.background="#fff";
+			}
+			if(tree[i].childNodes[0].nodeValue==text){
+				tree[i].style.background="#D795F0";
+				search=true;
+			}
+			else{
+				tree[i].style.background="#5FB2E7";
+			}
+			if(i==length-1){
+				
+				clearInterval(showtree);
+				ani=true;
+				setTimeout(function(){
+					if(tree[i].childNodes[0].nodeValue!=text){
+						tree[i].style.background="#fff";
+					}
+				},500);
+				if(!search){
+					alert("没有查询到相关内容！");
+				}
+				
+			}
+		},500);
+		
+	}
+	/*清除背景色和class*/
+	function clear(){
+		var all=document.getElementsByTagName("div");
+		var arr=Array.prototype.slice.call(all);
+		arr.forEach(function(item){
+			removeClass(item,"click");
+			item.style.background="#fff";
+		});
+	}
+	window.onload=function(){
+		var dlr=document.getElementById("DLR");
+		var lrd=document.getElementById("LRD");
+		var root=document.getElementById("root");
+		var search=document.getElementById("search");
+		var add=document.getElementById("add");
+		var remove=document.getElementById("remove");
+		/*前序遍历*/
+		dlr.onclick=function(){	
+			if(ani){
+				tree=[];
+			    ani=false;
+			    dlrtree(root);
+				clear();
+			    show();
+		    }
+		   else{
+			alert("正在动画中！");
+		}
+		}/*后序遍历*/
+		lrd.onclick=function(){	
+			if(ani){
+				tree=[];
+			    ani=false;
+			    lrdtree(root);
+				clear();
+			    show();
+		    }
+		   else{
+			alert("正在动画中！");
+		}
+		}/*查询*/
+		search.onclick=function(){
+			var text=document.getElementById("text").value;
+			if(text==""){
+				alert("查询内容不能为空");
+			}
+			else if(ani){
+				tree=[];
+			    ani=false;
+				dlrtree(root);
+				clear();
+				showSearch(text);
+				
+			}
+			else{
+				alert("正在动画中！");
+			}
+		}
+		/*为每一个div绑定点击事件*/
+		function divClick(){
+			var all=document.getElementsByTagName("div");
+			var arr=Array.prototype.slice.call(all);/*将类数组转化为数组*/
+			arr.forEach(function(item){
+				item.onclick=function(event){
+					clear();
+					addClass(item,"click");
+					event.stopPropagation()
+				}
+			});
+			
+		}
+		divClick();
+		/*增加节点*/
+		add.onclick=function(){
+			
+			var text=document.getElementById("newText").value;
+			var parent=document.getElementsByClassName("click");
+			var son=document.createElement("div");
+			son.innerText=text;
+			if(parent.length==0){
+				alert("请选择插入子元素的地方");
+			}
+			else{
+				parent[0].appendChild(son);
+			}	
+			divClick();/*为新增加的div绑定点击事件*/
+		}
+		/*删除节点*/
+		remove.onclick=function(){
+			var son=document.getElementsByClassName("click");
+			if(son.length==0){
+				alert("请选择要删除的元素");
+			}
+			else{
+				var parent=son[0].parentNode;
+				parent.removeChild(son[0]);
+			}
+			
+		}
+	}
+	
+</script>
+</head>
+
+<body>
+
+<div id="root">A<div>B<div>D<div>H</div><div>I</div><div>I</div></div><div>E<div>J</div></div></div><div >C<div>F<div>K</div></div><div>G</div></div><div >V</div></div>
+
+<button id="DLR">前序遍历</button>
+<button id="LRD">后序遍历</button>
+<input id="text" type="text"><button id="search">查询</button>
+<input id="newText" type="text"><button id="add">添加</button>
+<button id="remove">删除</button>
+
+</body>
+</html>
